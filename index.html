@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nexo-Proxy</title>
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --accent: #6366f1;
+            --accent-hover: #4f46e5;
+            --text: #f8fafc;
+            --text-muted: #94a3b8;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: sans-serif; }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text);
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .main-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            flex: 1;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .main-container.hidden { display: none; }
+
+        h1 {
+            font-size: 3rem;
+            margin-bottom: 10px;
+            background: linear-gradient(to right, #6366f1, #a855f7);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        p { color: var(--text-muted); margin-bottom: 30px; }
+
+        .proxy-box {
+            background: var(--card-bg);
+            padding: 8px;
+            border-radius: 50px;
+            display: flex;
+            width: 100%;
+            max-width: 600px;
+            border: 1px solid #334155;
+        }
+
+        .proxy-box input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            outline: none;
+            color: var(--text);
+            padding: 0 25px;
+            font-size: 1.1rem;
+        }
+
+        .proxy-box button {
+            background: var(--accent);
+            color: white;
+            border: none;
+            padding: 14px 30px;
+            border-radius: 50px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        #nav-bar {
+            display: none;
+            background: var(--card-bg);
+            padding: 10px 20px;
+            align-items: center;
+            gap: 15px;
+            border-bottom: 1px solid #334155;
+        }
+
+        .nav-btn {
+            background: #334155;
+            color: var(--text);
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        /* Ein sicheres Iframe lädt Seiten deutlich stabiler */
+        #proxy-view {
+            display: none;
+            width: 100%;
+            flex: 1;
+            background: white;
+            border: none;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="main-container" id="home">
+        <h1>Nexo-Proxy</h1>
+        <p>Surfe anonym, sicher und komplett uneingeschränkt.</p>
+        <div class="proxy-box">
+            <input type="text" id="url-input" placeholder="google.com oder URL eingeben..." onkeydown="if(event.key === 'Enter') launchProxy()">
+            <button onclick="launchProxy()">Surfen</button>
+        </div>
+    </div>
+
+    <div id="nav-bar">
+        <button class="nav-btn" onclick="goHome()">🏠 Home</button>
+        <div style="font-size: 0.9rem; color: var(--text-muted)" id="current-url">Proxy aktiv</div>
+    </div>
+
+    <iframe id="proxy-view"></iframe>
+
+    <script>
+        const WORKER_URL = "https://proxy.nexo07-games.workers.dev";
+
+        function launchProxy() {
+            let input = document.getElementById('url-input').value.trim();
+            if (!input) return;
+
+            // Verhindert den "URL not valid" Fehler, falls der User das https:// vergisst
+            if (!input.startsWith('http://') && !input.startsWith('https://')) {
+                input = 'https://' + input;
+            }
+
+            const finalUrl = WORKER_URL + encodeURIComponent(input);
+            
+            document.getElementById('home').classList.add('hidden');
+            document.getElementById('nav-bar').style.display = 'flex';
+            
+            const iframe = document.getElementById('proxy-view');
+            iframe.style.display = 'block';
+            iframe.src = finalUrl;
+            
+            document.getElementById('current-url').innerText = "Aktiv: " + input;
+        }
+
+        function goHome() {
+            document.getElementById('home').classList.remove('hidden');
+            document.getElementById('nav-bar').style.display = 'none';
+            document.getElementById('proxy-view').style.display = 'none';
+            document.getElementById('proxy-view').src = '';
+            document.getElementById('url-input').value = '';
+        }
+    </script>
+</body>
+</html>
